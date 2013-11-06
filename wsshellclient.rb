@@ -26,9 +26,13 @@ class WSShellClient
         @currentpath=@path
         @got_shell = true
         begin
-            @wsshellclient = Savon.client(wsdl: @wsdlShellURL)
+            @wsshellclient = Savon.client(wsdl: @wsdlShellURL, endpoint: @wsdlShellURL.gsub(/\?wsdl$/,""))
+            # Check if the wsdl endpoint is public. If not, force the public endpoint
+            # TODO: Set the endpoint changing only private IP to public IP, but for now we will only copy the
+            #       WSDL URL without ending in "wsdl".
+            # @wsshellclient.endpoint = @wsdlShellURL.gsub(/\?wsdl$/,"")
             @wsshellclient.globals[:logger] = Logger.new(@outputLog)
-            @wsshellclient.globals[:log] = false
+            @wsshellclient.globals[:log] = true
             getCurrentContext
         rescue Wasabi::Resolver::HTTPError => e
             $stderr.puts "Error retrieving the WSDL file from #{@wsdlShellURL}: #{e.message}"
